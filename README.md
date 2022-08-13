@@ -393,4 +393,99 @@ docker build -t ecneb/my-project:v1 --build-arg DEFAULT_PORT=8000 .
 
 ### Docker Compose - Simple-Container Orchestration
 
+```yml
+version: "3.8"
+services:
+	mongodb:
+		image: 'mongo:latest'
+		container_name: 'mongodb'
+		volumes:
+			- 'volume:/data/db'
+		networks:
+			- network
+		environment:
+			- MONGO_INIT_ROOT_USERNAME: user
+			- MONGO_INIT_ROOT_PASSWORD: password
+		expose:
+			- 270717
+		restart: no
+	backend:
+		build: './backend'
+		container_name: 'backend'
+		healtcheck:
+			test: ["CMD", "curl", "--fail", "http://localhost/health"]
+			interval: 1m30s
+			timeout: 10s
+			retries: 3
+			start_period: 1m
+		volumes:
+			- '/Users/ecneb/dev/docker-complete-folder:/app'
+		networks:
+			- network
+		env_file:
+			- './env/backend.env'
+		depends_on:
+			- mongodb
+		ports:
+			- 80:80
+		restart: always
+	frontend:
+		build: 
+			context: './frontend'
+			dockerfile: Dockerfile
+		container_name: 'frontend'
+		volumes:
+			- ./frontend/src:/app/src 
+		networks:
+			- network
+		links:
+			- backend
+		depends_on:
+			- backend
+		ports:
+			- 3000:3000
+		restart: on-failure
+networks:
+	network
+volumes:
+	volume:
+```
+
+```bash
+docker compose up
+docker compose down
+
+## Start as background task
+docker compose up -d
+
+## Remove volumes too
+docker compose down -v
+
+## Fore rebuild Dockerfile, only when we use 'build'
+docker compose up --build
+
+## Using run so we can name only one service and using its cmd options 
+docker-compose run --rm composer create-project --prefer-dist laravel/laravel .
+docker-compose up server php mysql 
+
+## If we set depends_on to php and mysql then we dont have to name them explicitly
+docker-compose up server
+```
+
+Healtchecks:
+- It expects exit 0 (OK) or exit 1 (Error)
+- Example curl --fail http://localhost/health || exit 1
+
+With compose we can always override the defaults from Dockerfile and other compose files. Files:
+- Dockerfile
+- docker-compose.yml
+- docker-compose.override.yml
+- docker-compose.prod.yml
+- docker-compose.test.yml
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.test.yml up -d
+docker compose -f docker-compose.yml -f docker-compose.prod.yml config > output.yml
+```
+
 ### Kubernetes
