@@ -487,5 +487,3 @@ With compose we can always override the defaults from Dockerfile and other compo
 docker compose -f docker-compose.yml -f docker-compose.test.yml up -d
 docker compose -f docker-compose.yml -f docker-compose.prod.yml config > output.yml
 ```
-
-### Kubernetes
