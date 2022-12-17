@@ -33,7 +33,16 @@ sudo apt-get update
  
 ### Install docker and docker compose on Ubuntu
 sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
- 
+
+### Assigning permissions
+sudo groupadd docker
+sudo usermod -aG docker $USER
+sudo shutdown -r now
+
+mkdir $HOME/.docker
+sudo chown -R $USER $HOME/.docker
+chmod -R u+wrx $HOME/.docker
+
 ### Verify the Docker and docker compose install on Ubuntu
 sudo docker run hello-world
 ```
